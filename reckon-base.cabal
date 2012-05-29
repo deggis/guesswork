@@ -1,0 +1,32 @@
+Name:          reckon-base
+Version:       0.1
+Synopsis:      A framework for remote sensing.
+Description:   A framework for remote sensing. Library is intended to be
+  versatile and supports also other use cases than remote sensing.
+License:       MIT
+License-file:  LICENSE
+Author:        Heikki Salo
+Maintainer:    heikki.ao.salo@iki.fi
+Category:      Math
+Build-type:    Simple
+
+-- Extra files to be distributed with the package, such as examples or
+-- a README.
+-- Extra-source-files:  
+
+-- Constraint on the version of Cabal needed to build this package.
+Cabal-version:       >=1.2
+
+Executable reckon-common
+  -- .hs or .lhs file containing the Main module.
+  -- Main-is:             
+  
+  -- Packages needed in order to build this package.
+  -- Build-depends:       
+  
+  -- Modules not exported by this package.
+  -- Other-modules:       
+  
+  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
+  -- Build-tools:         
+  
