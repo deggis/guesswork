@@ -1,5 +1,5 @@
 Name:          reckon-base
-Version:       0.1
+Version:       0.0.1
 Synopsis:      A framework for remote sensing.
 Description:   A framework for remote sensing. Library is intended to be
   versatile and supports also other use cases than remote sensing.
