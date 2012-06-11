@@ -1,7 +1,7 @@
-module Reckon.Math.Statistics where
+module Guesswork.Math.Statistics where
 
 import qualified Data.Vector.Unboxed as VU
-import Reckon.Types
+import Guesswork.Types
 
 kh xs = sqrt . (/n) . sum . map (\x->(x-avg')**2) $ xs
   where avg' = avg xs

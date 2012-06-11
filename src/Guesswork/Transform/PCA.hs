@@ -18,7 +18,7 @@
 --module Numeric.Statistics.PCA (
 --                               pca, pcaTransform, PCAData, pcaReduce
 --                          ) where
-module Reckon.Transform.PCA where
+module Guesswork.Transform.PCA where
 
 -----------------------------------------------------------------------------
 

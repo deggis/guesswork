@@ -1,13 +1,13 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {-|
-    This module contains minimal imports for Reckon and defines RWST Reckon
+    This module contains minimal imports for Guesswork and defines RWST Guesswork
     type.
 
 -}
-module Reckon where
+module Guesswork where
 
-import Reckon.Types
+import Guesswork.Types
 
 -- paketti, josta pitää vielä valita kohdeattribuutti
 --type FatSample = (KoealaData, Features)

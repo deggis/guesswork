@@ -1,12 +1,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module Reckon.Types where
+module Guesswork.Types where
 
 import Control.Monad.RWS.Strict
 import Control.Exception
 import Data.Typeable
 import qualified Data.Vector.Unboxed as V
 
-type Reckon a = RWST Conf Log () IO a
+type Guesswork a = RWST Conf Log () IO a
 
 data Conf = Conf
 
@@ -22,7 +22,7 @@ type Trace = String
 
 type Sample = (Double,FeatureVector)
 
-data ReckonException = DataSplitException String
+data GuessworkException = DataSplitException String
     deriving (Show,Typeable)
 
-instance Exception ReckonException
+instance Exception GuessworkException

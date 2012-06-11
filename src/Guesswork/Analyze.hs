@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
-module Reckon.Analyze where
+module Guesswork.Analyze where
 
-import Reckon.Types
-import Reckon.Math.Statistics
-import qualified Reckon.Estimate as ESTIMATE
+import Guesswork.Types
+import Guesswork.Math.Statistics
+import qualified Guesswork.Estimate as ESTIMATE
 
 data Analyzed = Analyzed { trace :: Trace
                          , minError :: Double
@@ -12,7 +12,7 @@ data Analyzed = Analyzed { trace :: Trace
                          , rmse :: Double }
     deriving Show
 
-analyze :: ESTIMATE.Estimated  -> Reckon Analyzed
+analyze :: ESTIMATE.Estimated  -> Guesswork Analyzed
 analyze ESTIMATE.Estimated{..} =
     let errors   = map abs $ zipWith (-) truths estimates
         minError = minimum errors

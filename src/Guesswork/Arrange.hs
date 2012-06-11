@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
-module Reckon.Arrange where
+module Guesswork.Arrange where
 
-import Reckon.Types
+import Guesswork.Types
 import Control.Monad
 import Control.Exception
 import qualified Data.Vector.Unboxed as V
@@ -17,7 +17,7 @@ data Arranged = Separated { train :: [Sample]
 -- |Splits data to training and testing using given ratio
 -- 'trainAmount' that is used for training, 0.5 as 50 %.
 -- First samples are used for training.
-splitWithRatio :: Double -> [Sample] -> Reckon Arranged
+splitWithRatio :: Double -> [Sample] -> Guesswork Arranged
 splitWithRatio trainAmount samples = do
     let n          = length samples
         toTraining = floor $ fromIntegral n * trainAmount

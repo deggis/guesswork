@@ -1,4 +1,4 @@
-Name:          reckon-base
+Name:          guesswork-base
 Version:       0.0.1
 Synopsis:      A framework for remote sensing.
 Description:   A framework for remote sensing. Library is intended to be
@@ -27,15 +27,15 @@ Library
                  , mtl
                  , hmatrix
 
-    Exposed-modules: Reckon.Transform
-                   , Reckon.Math.Statistics
-                   , Reckon.Arrange
-                   , Reckon.Analyze
-                   , Reckon.Transform.Scale
-                   , Reckon.Estimate
-                   , Reckon.Export.Print
-                   , Reckon
-                   , Reckon.Types
+    Exposed-modules: Guesswork.Transform
+                   , Guesswork.Math.Statistics
+                   , Guesswork.Arrange
+                   , Guesswork.Analyze
+                   , Guesswork.Transform.Scale
+                   , Guesswork.Estimate
+                   , Guesswork.Export.Print
+                   , Guesswork
+                   , Guesswork.Types
 
 --Test-Suite math
 --    type:

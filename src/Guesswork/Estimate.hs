@@ -1,15 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Reckon.Estimate where
+module Guesswork.Estimate where
 
 import Control.Arrow
 import Data.Ord
 import Data.List
-import Reckon.Types
-import Reckon.Math.Statistics
-import qualified Reckon.Transform as TRANSFORM
+import Guesswork.Types
+import Guesswork.Math.Statistics
+import qualified Guesswork.Transform as TRANSFORM
 
-type Estimator = TRANSFORM.Transformed -> Reckon Estimated
+type Estimator = TRANSFORM.Transformed -> Guesswork Estimated
 
 data Estimated = Estimated { truths    :: [Double]
                            , estimates :: [Double]
@@ -23,7 +23,7 @@ data Estimated = Estimated { truths    :: [Double]
 --
 
 -- | Assumes scaled & prepared data.
-knn :: TRANSFORM.Transformed -> Reckon Estimated
+knn :: TRANSFORM.Transformed -> Guesswork Estimated
 knn (TRANSFORM.Separated train test trace) = do
 --    info l $ "Estimating " ++ dataSetBranch
     let (trainSet,fitnessSet) = splitAt (length train `div` 2) train

@@ -1,5 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
-module Reckon.Transform where
+module Guesswork.Transform where
 
 import Control.Arrow
 
@@ -7,13 +7,13 @@ import Control.Arrow
 --import qualified Data.Packed.Vector as V
 --import qualified Data.Packed.Matrix as M
 --
---import qualified Reckon.Transform.PCA as PCA
+--import qualified Guesswork.Transform.PCA as PCA
 
 import qualified Data.Vector.Unboxed as V
-import qualified Reckon.Transform.Scale as S
+import qualified Guesswork.Transform.Scale as S
 
-import Reckon.Types
-import qualified Reckon.Arrange as ARRANGE
+import Guesswork.Types
+import qualified Guesswork.Arrange as ARRANGE
 
 
 data Method = Scale -- No reduction, just scale data.
@@ -34,7 +34,7 @@ data Transformed = Separated { train :: [Sample]
                                , trace' :: String }
     deriving(Show)
 
-scale :: ARRANGE.Arranged -> Reckon Transformed
+scale :: ARRANGE.Arranged -> Guesswork Transformed
 scale (ARRANGE.Separated train test trace) = do
     let op     = getTransform Scale . map snd $ train
         train' = applyToFs op train

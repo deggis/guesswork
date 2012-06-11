@@ -1,10 +1,10 @@
-module Reckon.Transform.Scale where
+module Guesswork.Transform.Scale where
 
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Packed.Vector as PV
 import qualified Data.Packed.Matrix as PM
 import Data.List
-import Reckon.Types
+import Guesswork.Types
 
 type FeatureValues = VU.Vector Double
 
