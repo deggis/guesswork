@@ -7,27 +7,17 @@
 -}
 module Reckon where
 
-import Control.Monad.RWS.Strict
-
-type Reckon a = RWST Conf Log () IO a
-
-type Log = [(String,[String])]
-
-type LogFile = (String, [String])
-
-type FeatureVector = [Double]
-
-type Trace = String
+import Reckon.Types
 
 -- paketti, josta pitää vielä valita kohdeattribuutti
-type FatSample = (KoealaData, Features)
+--type FatSample = (KoealaData, Features)
 
 -- estimoitava arvo (puumäärä) + piirteet
-type Sample = (Double,Features)
+--type Sample = (Double,Features)
 
-class Sample a where
-    attribute :: String -> a -> NamedValue
-    features  :: a -> FeatureVector
+--class Sample a where
+--    attribute :: String -> a -> NamedValue
+--    features  :: a -> FeatureVector
 
 data NamedValue = NamedValue { value :: Double, name :: String }
 

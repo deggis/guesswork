@@ -14,10 +14,11 @@
 --
 -----------------------------------------------------------------------------
 
-module Numeric.Statistics.PCA (
-                               pca, pcaTransform, PCAData, pcaReduce
-                          ) where
-
+--Previously:
+--module Numeric.Statistics.PCA (
+--                               pca, pcaTransform, PCAData, pcaReduce
+--                          ) where
+module Reckon.Transform.PCA where
 
 -----------------------------------------------------------------------------
 

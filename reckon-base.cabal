@@ -10,23 +10,38 @@ Maintainer:    heikki.ao.salo@iki.fi
 Category:      Math
 Build-type:    Simple
 
--- Extra files to be distributed with the package, such as examples or
--- a README.
--- Extra-source-files:  
-
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2
 
-Executable reckon-common
-  -- .hs or .lhs file containing the Main module.
-  -- Main-is:             
-  
-  -- Packages needed in order to build this package.
-  -- Build-depends:       
-  
-  -- Modules not exported by this package.
-  -- Other-modules:       
-  
-  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
-  -- Build-tools:         
-  
+Library
+    hs-source-dirs: src
+
+    Build-depends: base
+                 , array
+                 , vector
+                 , filepath
+                 , split
+--                 , hstatistics
+--                 , hmatrix-gsl-stats
+                 , attoparsec
+                 , mtl
+                 , hmatrix
+
+    Exposed-modules: Reckon.Transform
+                   , Reckon.Math.Statistics
+                   , Reckon.Arrange
+                   , Reckon.Analyze
+                   , Reckon.Transform.Scale
+                   , Reckon.Estimate
+                   , Reckon.Export.Print
+                   , Reckon
+                   , Reckon.Types
+
+--Test-Suite math
+--    type:
+
+--Executable reckoner
+--    hs-source-dirs: src
+--    main-is:  main.hs
+----  extra-libraries:
+----      gslcblas

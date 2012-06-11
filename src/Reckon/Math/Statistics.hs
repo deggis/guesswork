@@ -1,10 +1,16 @@
-module Reckon.Statistics.Measures where
+module Reckon.Math.Statistics where
+
+import qualified Data.Vector.Unboxed as VU
+import Reckon.Types
 
 kh xs = sqrt . (/n) . sum . map (\x->(x-avg')**2) $ xs
   where avg' = avg xs
         n    = fromIntegral . length $ xs
 
 avg xs = sum xs / (fromIntegral . length $ xs)
+
+euclidianNorm :: FeatureVector -> FeatureVector -> Double
+euclidianNorm u v = VU.sum $ VU.zipWith (\a b -> (a - b)**2) u v
 
 scaleLists truths preds =
     let minT = minimum truths
