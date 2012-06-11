@@ -21,6 +21,8 @@ Library
                  , vector
                  , filepath
                  , split
+                 , text
+                 , attoparsec
 --                 , hstatistics
 --                 , hmatrix-gsl-stats
                  , attoparsec
@@ -34,6 +36,7 @@ Library
                    , Guesswork.Transform.Scale
                    , Guesswork.Estimate
                    , Guesswork.Export.Print
+                   , Guesswork.Import.IO
                    , Guesswork
                    , Guesswork.Types
 
