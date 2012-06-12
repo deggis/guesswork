@@ -24,6 +24,13 @@ splitWithRatio trainAmount samples = do
         train      = take toTraining samples
         test       = drop toTraining samples
         trace      = "split"
-    when (train == []) . throw $ DataSplitException "Arranging failed: train set empty!"
-    when (test  == []) . throw $ DataSplitException "Arranging failed: test set empty!"
+    when (train == []) . throw $ ArrangeException "Arranging failed: train set empty!"
+    when (test  == []) . throw $ ArrangeException "Arranging failed: test set empty!"
     return Separated{..}
+
+-- |Use data as leave-one-out
+leaveOneOut :: [Sample] -> Guesswork Arranged
+leaveOneOut samples = do
+    when (samples == []) . throw $ ArrangeException "Empty sample set!"
+    let trace' = "leaveoneout"
+    return LeaveOneOut{..}
