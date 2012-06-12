@@ -1,8 +1,7 @@
 Name:          guesswork-base
 Version:       0.1.0
-Synopsis:      A framework for remote sensing.
-Description:   A framework for remote sensing. Library is intended to be
-  versatile and supports also other use cases than remote sensing.
+Synopsis:      A framework for estimation/classification..
+Description:   A framework for estimation/classification.
 License:       MIT
 License-file:  LICENSE
 Author:        Heikki Salo
@@ -23,9 +22,6 @@ Library
                  , split
                  , text
                  , attoparsec
---                 , hstatistics
---                 , hmatrix-gsl-stats
-                 , attoparsec
                  , mtl
                  , hmatrix
 
@@ -40,12 +36,3 @@ Library
                    , Guesswork.Types
                    , Guesswork.Flow
                    , Guesswork
-
---Test-Suite math
---    type:
-
---Executable reckoner
---    hs-source-dirs: src
---    main-is:  main.hs
-----  extra-libraries:
-----      gslcblas
