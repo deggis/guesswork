@@ -9,22 +9,21 @@ import qualified Guesswork.Estimate as ESTIMATE
 import qualified Guesswork.Analyze as ANALYZE
 import Guesswork.Types
 
-data GuessworkFlow = EstimateFlow { arranger :: ARRANGE.Arranger
+data GuessworkFlow = EstimateFlow { arrangement :: Guesswork ARRANGE.Arranged
                                   , transformer :: TRANSFORM.Transformer
                                   , estimator :: ESTIMATE.Estimator
                                   , analyzer :: ANALYZE.Analyzer }
 
-defaultKnnEstimate :: GuessworkFlow
-defaultKnnEstimate =
-    let arranger    = ARRANGE.splitWithRatio 0.5
-        transformer = TRANSFORM.scale
-        estimator   = ESTIMATE.knn
-        analyzer    = ANALYZE.analyze
+defaultKnnEstimate :: Guesswork ARRANGE.Arranged -> GuessworkFlow
+defaultKnnEstimate arrangement =
+    let transformer  = TRANSFORM.scale
+        estimator    = ESTIMATE.knn
+        analyzer     = ANALYZE.analyze
     in EstimateFlow{..}
 
-runGuesswork :: [Sample] -> GuessworkFlow -> IO ANALYZE.Analyzed
-runGuesswork samples EstimateFlow{..} = do
-    let tool = arranger samples >>=
+runGuesswork :: GuessworkFlow -> IO ANALYZE.Analyzed
+runGuesswork EstimateFlow{..} = do
+    let tool = arrangement >>=
                transformer >>=
                estimator >>=
                analyzer

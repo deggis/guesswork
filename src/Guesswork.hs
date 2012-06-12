@@ -29,9 +29,11 @@ module Guesswork
       -- ** Arrange data
     , splitWithRatio
     , leaveOneOut
+    , alreadySeparated
 
       -- ** Transform data
     , scale
+    , pass
 
       -- ** Estimation
     , knn
