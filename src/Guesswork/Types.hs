@@ -22,7 +22,7 @@ type Trace = String
 
 type Sample = (Double,FeatureVector)
 
-data GuessworkException = DataSplitException String
+data GuessworkException = ArrangeException String
                         | ParserException String
     deriving (Show,Typeable)
 

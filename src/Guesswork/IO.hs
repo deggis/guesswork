@@ -1,4 +1,4 @@
-module Guesswork.Import.IO where
+module Guesswork.IO where
 
 import Data.List.Split
 
@@ -15,9 +15,9 @@ import Guesswork.Types
 -- %f represents a double.
 sampleToText :: Sample -> T.Text
 sampleToText (att, vec) =
-    T.pack $ show att ++ " " ++ unwords vals
+    T.pack . concat $ [show att, " ", unwords vals]
   where
-    vals = map (\(i,v) -> show i ++ ":" ++ show v) . zip [1..] . V.toList $ vec
+    vals = map (\(i,v) -> concat [show i, ":", show v]) . zip [1..] . V.toList $ vec
 
 -- |Parses a sample in format of "%f 1:%f 2:%f 3:%f 4:%f" where
 -- %f represents a double.
@@ -27,7 +27,7 @@ sample = do
     P.skipSpace
     let feature = P.decimal *> P.char ':' *> pDouble "featureValue"
     features <- P.many1 (feature <* P.skipSpace)
-    return $! (attribute, V.fromList features)
+    return (attribute, V.fromList features)
   where
     pDouble s = P.double P.<?> s
 
@@ -38,7 +38,7 @@ readFeatureFile fn = do
     return $ map parser lns
   where
     parser l =
-        case (P.parseOnly sample l) of
+        case P.parseOnly sample l of
             Left _ -> throw $ ParserException ("Parsing failed with line: "++T.unpack l)
             Right x -> x
 
