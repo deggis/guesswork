@@ -34,6 +34,9 @@ data Transformed = Separated { train :: [Sample]
                                , trace' :: String }
     deriving(Show)
 
+-- |Scaling transformation: scales data values between [0,1]
+-- based on feature ranges of train data points.
+-- FIXME: enable different scaling methods.
 scale :: ARRANGE.Arranged -> Guesswork Transformed
 scale (ARRANGE.Separated train test trace) = do
     let op     = getTransform Scale . map snd $ train
@@ -41,7 +44,18 @@ scale (ARRANGE.Separated train test trace) = do
         test'  = applyToFs op test
         trace' = trace ++ ",D=scaling"
     return $ Separated train' test' trace'
-scale _ = error "Not supported scaling data."
+scale (ARRANGE.LeaveOneOut samples trace) = do
+    let trace' = trace ++ ",D=scaling"
+    return $ LeaveOneOut samples trace'
+
+-- |No-op, just pass the data without doing any transformations.
+pass :: ARRANGE.Arranged -> Guesswork Transformed
+pass (ARRANGE.Separated train test trace) = do
+    let trace' = trace ++ ",D=pass"
+    return $ Separated train test trace
+pass (ARRANGE.LeaveOneOut samples trace) = do
+    let trace' = trace ++ ",D=pass"
+    return $ LeaveOneOut samples trace'
 
 applyToFs f = map (second (apply f))
 
