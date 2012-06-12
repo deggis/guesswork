@@ -36,9 +36,9 @@ Library
                    , Guesswork.Transform.Scale
                    , Guesswork.Estimate
                    , Guesswork.Export.Print
-                   , Guesswork.Import.IO
-                   , Guesswork
+                   , Guesswork.IO
                    , Guesswork.Types
+                   , Guesswork
 
 --Test-Suite math
 --    type:
