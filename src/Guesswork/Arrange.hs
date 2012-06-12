@@ -6,6 +6,7 @@ import Control.Monad
 import Control.Exception
 import qualified Data.Vector.Unboxed as V
 
+type Arranger = [Sample] -> Guesswork Arranged
 
 data Arranged = Separated { train :: [Sample]
                           , test :: [Sample]

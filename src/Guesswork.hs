@@ -1,37 +1,50 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {-|
-    This module contains minimal imports for Guesswork and defines RWST Guesswork
-    type.
+
+This module contains basic Guesswork definitions for reading/writing
+files and basic tools to get started quickly.
 
 -}
-module Guesswork where
+module Guesswork
+    (
+      -- * Guesswork Monad
+      Guesswork
+    , Conf
+    , defaultConf
+
+      -- ** Guesswork flows
+    , defaultKnnEstimate
+    , runGuesswork
+    , GuessworkFlow(..)
+
+      -- ** Essential types
+    , Sample
+    , FeatureVector
+
+      -- ** IO: Reading/writing files
+    , readFeatureFile
+    , writeFeatureFile
+
+      -- ** Arrange data
+    , splitWithRatio
+    , leaveOneOut
+
+      -- ** Transform data
+    , scale
+
+      -- ** Estimation
+    , knn
+
+      -- ** Result analyzing
+    , analyze
+
+    ) where
 
 import Guesswork.Types
-
--- paketti, josta pitää vielä valita kohdeattribuutti
---type FatSample = (KoealaData, Features)
-
--- estimoitava arvo (puumäärä) + piirteet
---type Sample = (Double,Features)
-
---class Sample a where
---    attribute :: String -> a -> NamedValue
---    features  :: a -> FeatureVector
-
-data NamedValue = NamedValue { value :: Double, name :: String }
-
-
--- type Estimator = [Sample] -> [Sample] -> EstimationResults
--- 
--- data EstimationResults = EstimationResults { truth :: [Double]
---                                            , predicted :: [Double] }
---     deriving (Show)
--- 
--- type KoealaFeature = KoealaData -> Double -- tai [Double] ?
--- 
--- data TInfos = TInfos { infos :: [Koeala] }
--- 
--- data TImages = TImages { images :: [KoealaData] }
--- 
-
+import Guesswork.IO
+import Guesswork.Estimate
+import Guesswork.Arrange
+import Guesswork.Transform
+import Guesswork.Analyze
+import Guesswork.Flow

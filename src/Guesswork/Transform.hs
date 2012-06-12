@@ -15,6 +15,7 @@ import qualified Guesswork.Transform.Scale as S
 import Guesswork.Types
 import qualified Guesswork.Arrange as ARRANGE
 
+type Transformer = ARRANGE.Arranged -> Guesswork Transformed
 
 data Method = Scale -- No reduction, just scale data.
 --            | PCA { eigenThreshold :: Double }

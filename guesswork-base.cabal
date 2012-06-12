@@ -1,5 +1,5 @@
 Name:          guesswork-base
-Version:       0.0.1
+Version:       0.1.0
 Synopsis:      A framework for remote sensing.
 Description:   A framework for remote sensing. Library is intended to be
   versatile and supports also other use cases than remote sensing.
@@ -38,6 +38,7 @@ Library
                    , Guesswork.Export.Print
                    , Guesswork.IO
                    , Guesswork.Types
+                   , Guesswork.Flow
                    , Guesswork
 
 --Test-Suite math
