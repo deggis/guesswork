@@ -5,9 +5,6 @@ import Guesswork.Types
 import Guesswork.Math.Statistics
 import qualified Guesswork.Estimate as ESTIMATE
 
---FIXME: can't be only for estimation
-type Analyzer = ESTIMATE.Estimated -> Guesswork Analyzed
-
 data Analyzed = Analyzed { trace :: Trace
                          , minError :: Double
                          , maxError :: Double
@@ -15,8 +12,8 @@ data Analyzed = Analyzed { trace :: Trace
                          , rmse :: Double }
     deriving Show
 
-analyze :: ESTIMATE.Estimated  -> Guesswork Analyzed
-analyze ESTIMATE.Estimated{..} =
+analyze :: ESTIMATE.Result a -> Guesswork Analyzed
+analyze ESTIMATE.Estimates{..} =
     let errors   = map abs $ zipWith (-) truths estimates
         minError = minimum errors
         maxError = maximum errors

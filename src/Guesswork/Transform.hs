@@ -15,8 +15,6 @@ import qualified Guesswork.Transform.Scale as S
 import Guesswork.Types
 import qualified Guesswork.Arrange as ARRANGE
 
-type Transformer = ARRANGE.Arranged -> Guesswork Transformed
-
 data Method = Scale -- No reduction, just scale data.
 --            | PCA { eigenThreshold :: Double }
             | Pass -- Pass data
@@ -29,10 +27,10 @@ data Operation = ScaleOp { ranges :: [(Double,Double)] }
     deriving (Show)
 
 data Transformed = Separated { train :: [Sample]
-                             , test :: [Sample]
-                             , trace :: String }
-                 | LeaveOneOut { samples :: [Sample]
-                               , trace' :: String }
+                 , test :: [Sample]
+                 , trace :: Trace }
+                 | LeaveOneOut [Sample] Trace
+                 | OnlyTrain [Sample] Operation Trace
     deriving(Show)
 
 -- |Scaling transformation: scales data values between [0,1]
@@ -43,11 +41,14 @@ scale (ARRANGE.Separated train test trace) = do
     let op     = getTransform Scale . map snd $ train
         train' = applyToFs op train
         test'  = applyToFs op test
-        trace' = trace ++ ",D=scaling"
-    return $ Separated train' test' trace'
+    return $ Separated train' test' (trace ++ ",D=scaling")
 scale (ARRANGE.LeaveOneOut samples trace) = do
-    let trace' = trace ++ ",D=scaling"
-    return $ LeaveOneOut samples trace'
+    let op     = getTransform Scale . map snd $ samples
+    return $ LeaveOneOut (applyToFs op samples) (trace ++ ",D=scaling")
+scale (ARRANGE.OnlyTrain train trace) = do
+    let op     = getTransform Scale . map snd $ train
+        train' = applyToFs op train
+    return $ OnlyTrain train' op (trace ++ ",D=scaling")
 
 -- |No-op, just pass the data without doing any transformations.
 pass :: ARRANGE.Arranged -> Guesswork Transformed
@@ -57,6 +58,8 @@ pass (ARRANGE.Separated train test trace) = do
 pass (ARRANGE.LeaveOneOut samples trace) = do
     let trace' = trace ++ ",D=pass"
     return $ LeaveOneOut samples trace'
+pass (ARRANGE.OnlyTrain train trace) = do
+    return $ OnlyTrain train PassOp (trace ++ ",D=pass")
 
 applyToFs f = map (second (apply f))
 

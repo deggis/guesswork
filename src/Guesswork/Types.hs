@@ -27,3 +27,6 @@ data GuessworkException = ArrangeException String
     deriving (Show,Typeable)
 
 instance Exception GuessworkException
+
+class Estimator a where
+    estimate :: a -> FeatureVector -> Double

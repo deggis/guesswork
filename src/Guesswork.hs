@@ -30,12 +30,16 @@ module Guesswork
     , splitWithRatio
     , leaveOneOut
     , alreadySeparated
+    , onlyTrain
 
       -- ** Transform data
     , scale
     , pass
 
       -- ** Estimation
+    , Estimator
+    , estimate
+    , function
     , knn
 
       -- ** Result analyzing
@@ -46,6 +50,7 @@ module Guesswork
 import Guesswork.Types
 import Guesswork.IO
 import Guesswork.Estimate
+import Guesswork.Estimate.KNN
 import Guesswork.Arrange
 import Guesswork.Transform
 import Guesswork.Analyze

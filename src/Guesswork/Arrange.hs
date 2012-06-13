@@ -6,13 +6,11 @@ import Control.Monad
 import Control.Exception
 import qualified Data.Vector.Unboxed as V
 
---type Arranger = Guesswork Arranged
-
 data Arranged = Separated { train :: [Sample]
                           , test :: [Sample]
-                          , trace :: String }
-              | LeaveOneOut { samples :: [Sample]
-                          , trace' :: String }
+                          , trace :: Trace }
+              | LeaveOneOut [Sample] Trace
+              | OnlyTrain [Sample] Trace
     deriving(Show)
 
 -- |Splits data to training and testing using given ratio
@@ -33,11 +31,16 @@ splitWithRatio trainAmount samples = do
 leaveOneOut :: [Sample] -> Guesswork Arranged
 leaveOneOut samples = do
     when (samples == []) . throw $ ArrangeException "Empty sample set!"
-    let trace' = "A=leaveoneout"
-    return LeaveOneOut{..}
+    let trace = "A=leaveoneout"
+    return $ LeaveOneOut samples trace
 
 -- |Use beforehand separated train & test data.
 alreadySeparated :: [Sample] -> [Sample] -> Guesswork Arranged
 alreadySeparated train test = do
     let trace = "A=preseparated"
     return Separated{..}
+
+onlyTrain :: [Sample] -> Guesswork Arranged
+onlyTrain samples = do
+    let trace = "A=onlytrain"
+    return $ OnlyTrain samples trace
