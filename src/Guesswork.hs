@@ -44,6 +44,8 @@ module Guesswork
     , defaultKNN
     , trainKNN
     , trainKNN'
+    , linear
+    , trainLinear
 
       -- ** Result analyzing
     , analyze
@@ -54,6 +56,7 @@ import Guesswork.Types
 import Guesswork.IO
 import Guesswork.Estimate
 import Guesswork.Estimate.KNN
+import Guesswork.Estimate.Linear
 import Guesswork.Arrange
 import Guesswork.Transform
 import Guesswork.Analyze

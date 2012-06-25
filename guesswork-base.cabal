@@ -32,6 +32,7 @@ Library
                    , Guesswork.Transform.Scale
                    , Guesswork.Estimate
                    , Guesswork.Estimate.KNN
+                   , Guesswork.Estimate.Linear
                    , Guesswork.Export.Print
                    , Guesswork.IO
                    , Guesswork.Types

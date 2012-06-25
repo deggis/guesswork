@@ -55,7 +55,7 @@ fitnessKNN :: [Sample] -> [Sample] -> Int -> Double
 fitnessKNN train fitness k =
     let estimates = map (kNNEstimate train k . snd) fitness
         truths    = map fst fitness
-    in 1 `seq` calcFitness truths estimates
+    in calcFitness truths estimates
 
 kNNEstimate :: [Sample] -> Int -> FeatureVector -> Double
 kNNEstimate others k features =
@@ -71,12 +71,6 @@ fitnessAvg truths estimates = avg $ zipWith (\a b -> abs (a-b)) truths estimates
 
 calcFitness = fitnessAvg
 
-
--- | Returns (element from given index, rest).
-takeBut :: [a] -> Int -> (a,[a])
-takeBut xs index = if index < length xs
-                        then (xs !! index, take index xs ++ drop (index+1) xs)
-                        else error "takeBut: index too big."
 
 --crossValidateKNN :: Int -> [JuicyPack] -> Double
 --crossValidateKNN k trainset =
