@@ -14,9 +14,7 @@ module Guesswork
     , defaultConf
 
       -- ** Guesswork flows
-    , defaultKnnEstimate
     , runGuesswork
-    , GuessworkFlow(..)
 
       -- ** Essential types
     , Sample
@@ -34,13 +32,18 @@ module Guesswork
 
       -- ** Transform data
     , scale
+    , scale'
+    , defaultScaleConfig
     , pass
 
       -- ** Estimation
     , Estimator
     , estimate
-    , function
-    , knn
+    , kNN
+    , kNN'
+    , defaultKNN
+    , trainKNN
+    , trainKNN'
 
       -- ** Result analyzing
     , analyze

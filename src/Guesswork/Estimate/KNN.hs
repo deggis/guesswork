@@ -17,22 +17,36 @@ data KNN = KNN [Sample] Int TRANSFORM.Operation Trace
 instance Estimator KNN where
     estimate (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
 
+data KNNConfig = KNNConfig { ks :: [Int] }
+
+-- | Default KNN configuration: test k values between 1 and 20.
+defaultKNN = KNNConfig [1..20]
+
+-- | Perform KNN with defaultKNN configuration.
+kNN :: TRANSFORM.Transformed -> Guesswork Estimated
+kNN = kNN' defaultKNN
+
 -- | Assumes scaled & prepared data.
-knn :: TRANSFORM.Transformed -> Guesswork (Result KNN)
-knn (TRANSFORM.Separated train test trace) = do
-    let bestK = findBestK train
+kNN' :: KNNConfig -> TRANSFORM.Transformed -> Guesswork Estimated
+kNN' conf (TRANSFORM.Separated train test trace) = do
+    let bestK = findBestK conf train
     let estimates    = map (kNNEstimate train bestK . snd) test
         truths       = map fst test
-    return $ Estimates truths estimates (trace ++ ",R=kNN")
-knn (TRANSFORM.OnlyTrain samples op trace) = do
-    let bestK  = findBestK samples
-    return . Worker $ KNN samples bestK op (trace ++ ",R=kNN")
-knn _ = error "Unsupported knn operation."
+    return $ Estimated truths estimates (trace ++ ",R=kNN")
+kNN' _ _ = error "Unsupported knn operation."
 
-findBestK :: [Sample] -> Int
-findBestK train =
+
+trainKNN = trainKNN' defaultKNN
+
+trainKNN':: KNNConfig -> TRANSFORM.Transformed -> Guesswork KNN
+trainKNN' conf (TRANSFORM.OnlyTrain samples op trace) = do
+    let bestK  = findBestK conf samples
+    return $ KNN samples bestK op (trace ++ ",R=kNN")
+trainKNN' _ _ = error "Unsupported knn operation."
+
+findBestK :: KNNConfig -> [Sample] -> Int
+findBestK KNNConfig{..} train =
     let (trainxs,fitxs) = splitAt (length train `div` 2) train
-        ks              = [1..20] --TODO: read from confs
         paired          = map (\k -> (k, fitnessKNN trainxs fitxs k)) ks
         bestK           = fst . head . sortBy (comparing snd) $ paired
     in bestK

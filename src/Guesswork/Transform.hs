@@ -15,14 +15,15 @@ import qualified Guesswork.Transform.Scale as S
 import Guesswork.Types
 import qualified Guesswork.Arrange as ARRANGE
 
-data Method = Scale -- No reduction, just scale data.
---            | PCA { eigenThreshold :: Double }
-            | Pass -- Pass data
+data ScaleConfig = ScaleConfig { toRange :: (Double,Double) }
     deriving (Show,Eq)
 
-data Operation = ScaleOp { ranges :: [(Double,Double)] }
---               | PCAOp { pcaData  :: PCA.PCAData
---                       , scaleOp' :: Operation }
+data Method = Scale ScaleConfig
+            | Pass
+    deriving (Show,Eq)
+
+data Operation = ScaleOp { config :: ScaleConfig
+                         , ranges :: [(Double,Double)] }
                | PassOp
     deriving (Show)
 
@@ -33,20 +34,26 @@ data Transformed = Separated { train :: [Sample]
                  | OnlyTrain [Sample] Operation Trace
     deriving(Show)
 
+defaultScaleConfig = ScaleConfig (0,1)
+
 -- |Scaling transformation: scales data values between [0,1]
 -- based on feature ranges of train data points.
--- FIXME: enable different scaling methods.
 scale :: ARRANGE.Arranged -> Guesswork Transformed
-scale (ARRANGE.Separated train test trace) = do
-    let op     = getTransform Scale . map snd $ train
+scale = scale' defaultScaleConfig
+
+-- |Scaling transformation: scales data values between given
+-- range based on feature ranges of train data points.
+scale' :: ScaleConfig -> ARRANGE.Arranged -> Guesswork Transformed
+scale' config (ARRANGE.Separated train test trace) = do
+    let op     = getTransform (Scale config) . map snd $ train
         train' = applyToFs op train
         test'  = applyToFs op test
     return $ Separated train' test' (trace ++ ",D=scaling")
-scale (ARRANGE.LeaveOneOut samples trace) = do
-    let op     = getTransform Scale . map snd $ samples
+scale' config (ARRANGE.LeaveOneOut samples trace) = do
+    let op     = getTransform (Scale config) . map snd $ samples
     return $ LeaveOneOut (applyToFs op samples) (trace ++ ",D=scaling")
-scale (ARRANGE.OnlyTrain train trace) = do
-    let op     = getTransform Scale . map snd $ train
+scale' config (ARRANGE.OnlyTrain train trace) = do
+    let op     = getTransform (Scale config) . map snd $ train
         train' = applyToFs op train
     return $ OnlyTrain train' op (trace ++ ",D=scaling")
 
@@ -81,8 +88,8 @@ applyToFs f = map (second (apply f))
 --                 _ -> error "Unsupported transform operation."
 
 apply :: Operation -> FeatureVector -> FeatureVector
-apply (ScaleOp ranges) vec = S.scaleUsingRanges vec ranges
-apply PassOp           vec = vec
+apply (ScaleOp ScaleConfig{..} ranges) vec = S.scaleUsingRanges toRange ranges vec
+apply PassOp                   vec = vec
 --apply PCAOp{..} vec =
 --     let box a  = [a]
 --         pack   = pcaPackVecs . S.rotate2DArray . box
@@ -91,7 +98,7 @@ apply PassOp           vec = vec
 --     in  unpack $ PCA.pcaTransform (pack scaled) pcaData
 
 getTransform :: Method -> [FeatureVector] -> Operation
-getTransform Scale trainData   = ScaleOp $ S.calcRanges trainData
+getTransform (Scale config) trainData   = ScaleOp config $ S.calcRanges trainData
 --getTransform PCA{..} trainData' =
 --    let pack      = pcaPackVecs . S.rotate2DArray
 --        scaleOp'  = getTransform Scale trainData'

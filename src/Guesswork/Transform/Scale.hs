@@ -26,8 +26,13 @@ calcRanges :: [FeatureVector] -> Ranges
 calcRanges = map (\v -> (VU.minimum v, VU.maximum v)) . rotateVecs
 
 -- | Scales a vector using vector index-vice (min,max) ranges.
-scaleUsingRanges :: FeatureVector -> Ranges -> FeatureVector
-scaleUsingRanges vec ranges = VU.fromList . map (uncurry scaleValue) . zip ranges . VU.toList $ vec
+scaleUsingRanges :: (Double,Double) -> Ranges -> FeatureVector -> FeatureVector
+scaleUsingRanges toRange ranges vec =
+    VU.fromList .
+    -- Scales first to [0,1] and then to desired range
+    map (scaleValue toRange . uncurry scaleValue) .
+    zip ranges .
+    VU.toList $ vec
 
 epsilon  = 0.0000000001
 

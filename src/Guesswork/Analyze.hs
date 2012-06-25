@@ -12,8 +12,8 @@ data Analyzed = Analyzed { trace :: Trace
                          , rmse :: Double }
     deriving Show
 
-analyze :: ESTIMATE.Result a -> Guesswork Analyzed
-analyze ESTIMATE.Estimates{..} =
+analyze :: ESTIMATE.Estimated -> Guesswork Analyzed
+analyze ESTIMATE.Estimated{..} =
     let errors   = map abs $ zipWith (-) truths estimates
         minError = minimum errors
         maxError = maximum errors
