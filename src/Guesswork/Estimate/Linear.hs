@@ -21,8 +21,8 @@ data Linear = Linear Solution TRANSFORM.Operation Trace
 
 type Solution = PM.Matrix Double
 
-instance Estimator Linear where
-    estimate (Linear solution op _) = apply solution . TRANSFORM.apply op
+instance GuessworkEstimator Linear where
+    guessWith (Linear solution op _) = apply solution . TRANSFORM.apply op
 
 linear :: TRANSFORM.Transformed -> Guesswork Estimated
 linear (TRANSFORM.Separated train test trace) = do

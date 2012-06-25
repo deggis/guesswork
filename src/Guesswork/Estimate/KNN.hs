@@ -15,8 +15,8 @@ import qualified Debug.Trace as T
 
 data KNN = KNN [Sample] Int TRANSFORM.Operation Trace
 
-instance Estimator KNN where
-    estimate (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
+instance GuessworkEstimator KNN where
+    guessWith (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
 
 type KNNFitness = [Sample] -> Int -> Double
 
@@ -28,7 +28,7 @@ defaultKNN = KNNConfig [1..20] splitFitness
 
 -- | Perform KNN with defaultKNN configuration.
 kNN :: TRANSFORM.Transformed -> Guesswork Estimated
-kNN t@TRANSFORM.Separated{..}   = kNN' defaultKNN t
+kNN t@TRANSFORM.Separated{..}   = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
 kNN t@TRANSFORM.LeaveOneOut{..} = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
 
 -- | Assumes scaled & prepared data.
@@ -37,7 +37,7 @@ kNN' conf (TRANSFORM.Separated train test trace) = do
     let bestK     = findBestK conf train
         estimates = map (kNNEstimate train bestK . snd) test
         truths    = map fst test
-    return $ Estimated truths estimates (trace ++ ",R=kNN")
+    return $ Estimated truths estimates (trace ++ ",R=kNN("++show bestK++")")
 kNN' conf (TRANSFORM.LeaveOneOut samples trace) = do
     let bestK     = findBestK conf samples
         indices   = [0..(length samples - 1)]

@@ -37,10 +37,11 @@ module Guesswork
     , pass
 
       -- ** Estimation
-    , Estimator
-    , estimate
+    , GuessworkEstimator
+    , guessWith
     , kNN
     , kNN'
+    , KNNConfig
     , defaultKNN
     , trainKNN
     , trainKNN'
