@@ -11,30 +11,40 @@ import Guesswork.Types
 import Guesswork.Math.Statistics
 import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
+import qualified Debug.Trace as T
 
 data KNN = KNN [Sample] Int TRANSFORM.Operation Trace
 
 instance Estimator KNN where
     estimate (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
 
-data KNNConfig = KNNConfig { ks :: [Int] }
+type KNNFitness = [Sample] -> Int -> Double
+
+data KNNConfig = KNNConfig { ks :: [Int]
+                           , fitness :: KNNFitness }
 
 -- | Default KNN configuration: test k values between 1 and 20.
-defaultKNN = KNNConfig [1..20]
+defaultKNN = KNNConfig [1..20] splitFitness
 
 -- | Perform KNN with defaultKNN configuration.
 kNN :: TRANSFORM.Transformed -> Guesswork Estimated
-kNN = kNN' defaultKNN
+kNN t@TRANSFORM.Separated{..}   = kNN' defaultKNN t
+kNN t@TRANSFORM.LeaveOneOut{..} = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
 
 -- | Assumes scaled & prepared data.
 kNN' :: KNNConfig -> TRANSFORM.Transformed -> Guesswork Estimated
 kNN' conf (TRANSFORM.Separated train test trace) = do
-    let bestK = findBestK conf train
-    let estimates    = map (kNNEstimate train bestK . snd) test
-        truths       = map fst test
+    let bestK     = findBestK conf train
+        estimates = map (kNNEstimate train bestK . snd) test
+        truths    = map fst test
     return $ Estimated truths estimates (trace ++ ",R=kNN")
-kNN' _ _ = error "Unsupported knn operation."
-
+kNN' conf (TRANSFORM.LeaveOneOut samples trace) = do
+    let bestK     = findBestK conf samples
+        indices   = [0..(length samples - 1)]
+        pairs     = map (takeBut samples) indices
+        estimates = map (\(x,xs) -> kNNEstimate xs bestK (snd x)) pairs
+        truths    = map fst samples
+    return $ Estimated truths estimates (trace ++ ",R=kNN("++show bestK++")")
 
 trainKNN = trainKNN' defaultKNN
 
@@ -45,16 +55,24 @@ trainKNN' conf (TRANSFORM.OnlyTrain samples op trace) = do
 trainKNN' _ _ = error "Unsupported knn operation."
 
 findBestK :: KNNConfig -> [Sample] -> Int
-findBestK KNNConfig{..} train =
-    let (trainxs,fitxs) = splitAt (length train `div` 2) train
-        paired          = map (\k -> (k, fitnessKNN trainxs fitxs k)) ks
-        bestK           = fst . head . sortBy (comparing snd) $ paired
+findBestK KNNConfig{..} samples =
+    let paired = map (\k->(k, fitness samples k)) ks
+        bestK = fst . head . sortBy (comparing snd) $ paired
     in bestK
 
-fitnessKNN :: [Sample] -> [Sample] -> Int -> Double
-fitnessKNN train fitness k =
-    let estimates = map (kNNEstimate train k . snd) fitness
-        truths    = map fst fitness
+splitFitness :: KNNFitness
+splitFitness samples k =
+    let (train,test) = splitAt (length samples `div` 2) samples
+        estimates = map (kNNEstimate train k . snd) test
+        truths    = map fst test
+    in calcFitness truths estimates
+
+leaveOneOutFitness :: KNNFitness
+leaveOneOutFitness samples k = 
+    let indices   = [0..(length samples - 1)]
+        pairs     = map (takeBut samples) indices
+        estimates = map (\(x,xs) -> kNNEstimate xs k (snd x)) pairs
+        truths    = map fst samples
     in calcFitness truths estimates
 
 kNNEstimate :: [Sample] -> Int -> FeatureVector -> Double
@@ -70,12 +88,3 @@ fitnessAvg :: [Double] -> [Double] -> Double
 fitnessAvg truths estimates = avg $ zipWith (\a b -> abs (a-b)) truths estimates
 
 calcFitness = fitnessAvg
-
-
---crossValidateKNN :: Int -> [JuicyPack] -> Double
---crossValidateKNN k trainset =
---    let indices   = [0..(length trainset - 1)]
---        pairs     = map (takeBut trainset) indices
---        estimates = map (uncurry (kNNEstimate k) . flip') pairs
---        truths    = extractAttributes trainset
---    in 1 `seq` fitness truths estimates
