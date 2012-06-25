@@ -17,7 +17,9 @@ import Guesswork.Math.Statistics
 import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
 
-data Linear = Linear (PM.Matrix Double) TRANSFORM.Operation Trace
+data Linear = Linear Solution TRANSFORM.Operation Trace
+
+type Solution = PM.Matrix Double
 
 instance Estimator Linear where
     estimate (Linear solution op _) = apply solution . TRANSFORM.apply op
@@ -31,21 +33,32 @@ linear (TRANSFORM.Separated train test trace) = do
         truths        = map fst test
     return $ Estimated truths estimates (trace ++ ",R=linear")
   where
-linear (TRANSFORM.LeaveOneOut samples trace) = error "loo not supported yet"
+linear (TRANSFORM.LeaveOneOut samples trace) = do
+    let indices    = [0..(length samples - 1)]
+        groups     = map (takeBut samples) indices
+        solutions  = map (second trainLinear') groups
+        truths     = map fst samples
+        estimates  = map (uncurry apply . second snd . flip') solutions
+    return $ Estimated truths estimates (trace ++ ",R=linear")
+  where
+    flip' (a,b) = (b,a)
 
 trainLinear :: TRANSFORM.Transformed -> Guesswork Linear
 trainLinear (TRANSFORM.OnlyTrain train op trace) = do
+    let solution = trainLinear' train
+    return $ Linear solution op (trace ++ ",R=linear")
+
+trainLinear' :: [Sample] -> Solution
+trainLinear' train =
     let trainFeatures = featureMatrix train
         trainTruth    = PV.fromList . map fst $ train
-        solution      = solve trainFeatures trainTruth 
-        trace'        = trace ++ ",R=linear"
-    return $ Linear solution op trace'
+    in solve trainFeatures trainTruth
 
 solve trainFeatures trainTruth = Algo.linearSolveSVD trainFeatures $ PM.fromColumns [trainTruth]
 
 featureMatrix = PM.fromRows . map (packVector . snd)
 
-apply :: PM.Matrix Double -> V.Vector Double -> Double
+apply :: Solution -> V.Vector Double -> Double
 apply solution features =
     let features'  = PM.fromRows [packVector features]
         [estimate] = PV.toList . head . PM.toColumns $ features' `N.mXm` solution
