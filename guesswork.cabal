@@ -1,8 +1,8 @@
 Name:          guesswork
 Version:       0.1.0
-Synopsis:      A framework for estimation/classification..
-Description:   A framework for estimation/classification.
-License:       MIT
+Synopsis:      A framework for estimation.
+Description:   A framework for estimation.
+License:       BSD3
 License-file:  LICENSE
 Author:        Heikki Salo
 Maintainer:    heikki.ao.salo@iki.fi
