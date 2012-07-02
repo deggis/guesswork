@@ -24,6 +24,7 @@ Library
                  , attoparsec
                  , mtl
                  , hmatrix
+                 , svm-simple
 
     Exposed-modules: Guesswork.Transform
                    , Guesswork.Math.Statistics
@@ -33,6 +34,7 @@ Library
                    , Guesswork.Estimate
                    , Guesswork.Estimate.KNN
                    , Guesswork.Estimate.Linear
+                   , Guesswork.Import.CSVUtils
                    , Guesswork.Export.Print
                    , Guesswork.IO
                    , Guesswork.Types
