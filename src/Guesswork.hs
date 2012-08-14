@@ -41,7 +41,7 @@ module Guesswork
     , guessWith
     , kNN
     , kNN'
-    , KNNConfig
+    , KNNConfig(..)
     , defaultKNN
     , trainKNN
     , trainKNN'
