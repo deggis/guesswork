@@ -60,6 +60,7 @@ findBestK KNNConfig{..} samples =
         bestK = fst . head . sortBy (comparing snd) $ paired
     in bestK
 
+-- FIXME: generalize
 splitFitness :: KNNFitness
 splitFitness samples k =
     let (train,test) = splitAt (length samples `div` 2) samples
@@ -67,6 +68,7 @@ splitFitness samples k =
         truths    = map fst test
     in calcFitness truths estimates
 
+-- FIXME: generalize
 leaveOneOutFitness :: KNNFitness
 leaveOneOutFitness samples k = 
     let indices   = [0..(length samples - 1)]
