@@ -7,6 +7,7 @@ kh xs = sqrt . (/n) . sum . map (\x->(x-avg')**2) $ xs
   where avg' = avg xs
         n    = fromIntegral . length $ xs
 
+avg [] = error "Empty list!"
 avg xs = sum xs / (fromIntegral . length $ xs)
 
 euclidianNorm :: FeatureVector -> FeatureVector -> Double
@@ -29,18 +30,23 @@ popVariance xs =
       ax = avg xs
   in (*(1/n)) . sum . map ((**2) . subtract ax) $ xs
 
--- |Pearson's sample correlation
+-- |Pearson's sample correlation. Correlation is in range
+-- [-1,1] and is 1.0 if lists are identical.
+-- List aren't checked to be of same length.
 sampleCorrelation :: [Double] -> [Double] -> Double
-sampleCorrelation xs ys =
-      let avgX   = avg xs
-          avgY   = avg ys
-          nxs    = map (subtract avgX) xs
-          nys    = map (subtract avgY) ys
-          upper  = sum $ zipWith (*) nxs nys
-          lowerX = sum $ map (**2) nxs
-          lowerY = sum $ map (**2) nys
-          lower  = sqrt $ lowerX * lowerY
-      in upper / lower
+sampleCorrelation xs ys 
+    | length xs < 2 || length ys < 2 = error "Correlation: too short lists." 
+    | otherwise                      = if (xs == ys) then 1.0 else corr
+  where
+    avgX   = avg xs
+    avgY   = avg ys
+    nxs    = map (subtract avgX) xs
+    nys    = map (subtract avgY) ys
+    upper  = sum $ zipWith (*) nxs nys
+    lowerX = sum $ map (**2) nxs
+    lowerY = sum $ map (**2) nys
+    lower  = sqrt $ lowerX * lowerY
+    corr   = upper / lower
 
 -- |Calculate root mean square error from given list of
 -- truths and predictions.
