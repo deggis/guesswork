@@ -36,7 +36,7 @@ popVariance xs =
 sampleCorrelation :: [Double] -> [Double] -> Double
 sampleCorrelation xs ys 
     | length xs < 2 || length ys < 2 = error "Correlation: too short lists." 
-    | otherwise                      = if (xs == ys) then 1.0 else corr
+    | otherwise                      = if xs == ys then 1.0 else corr
   where
     avgX   = avg xs
     avgY   = avg ys

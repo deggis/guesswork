@@ -7,8 +7,7 @@ import Text.Printf
 import qualified Guesswork.Math.Statistics as S
 import Debug.Trace
 
-main = do
-    mapM_ (\(s,a) -> printf "%-25s" s >> a) tests
+main = mapM_ (\(s,a) -> printf "%-25s" s >> a) tests
 
 eps = 0.000000001
 
@@ -28,11 +27,10 @@ genLists n = do
     return (xs,ys)
 
 prop_correlation = do
-    n <- choose (2,100) -- :: Gen Int)
+    n <- choose (2,100)
     (xs,ys) <- genLists n
     let
         corr = S.sampleCorrelation xs ys
-        d    = listDiff xs ys
     return . property $ corr >= (-1-eps) && corr <= (1+eps)
 
 tests = [("Statistics.avg", quickCheck prop_avg)
