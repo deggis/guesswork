@@ -2,7 +2,7 @@
 module Guesswork.Analyze where
 
 import Guesswork.Types
-import Guesswork.Math.Statistics
+import Guesswork.Math.Statistics as S
 import qualified Guesswork.Estimate as ESTIMATE
 
 data Analyzed = Analyzed { trace :: Trace
@@ -18,6 +18,6 @@ analyze ESTIMATE.Estimated{..} =
         minError = minimum errors
         maxError = maximum errors
         avgError = avg errors
-        rmse     = calcRMSE truths estimates
+        rmse     = S.rmse truths estimates
     in return $ Analyzed{..}
 

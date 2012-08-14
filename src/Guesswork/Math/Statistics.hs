@@ -12,19 +12,40 @@ avg xs = sum xs / (fromIntegral . length $ xs)
 euclidianNorm :: FeatureVector -> FeatureVector -> Double
 euclidianNorm u v = VU.sum $ VU.zipWith (\a b -> (a - b)**2) u v
 
+-- |Scales lists (truths, predictions) between [0,1] using
+-- scales from truths.
+-- NOTE: this means that all predictions aren't necessarily
+-- between [0,1].
 scaleLists truths preds =
-    let minT = minimum truths
-        maxT = maximum truths
-        scale = map (\x->(x-minT)/maxT)
-    in ((scale truths),(scale preds))
+    let minT  = minimum truths
+        maxT  = maximum truths
+        scale = map ((/ maxT) . subtract minT)
+    in (scale truths, scale preds)
 
-calcPopVariance :: [Double] -> Double
-calcPopVariance xs =
+-- |Calculate population variance.
+popVariance :: [Double] -> Double
+popVariance xs =
   let n  = fromIntegral . length $ xs
-  in (*(1/n)) . sum $ map (\x->(x-(avg xs))**2) xs
+      ax = avg xs
+  in (*(1/n)) . sum . map ((**2) . subtract ax) $ xs
 
-calcRMSE :: [Double] -> [Double] -> Double
-calcRMSE truths preds =
+-- |Pearson's sample correlation
+sampleCorrelation :: [Double] -> [Double] -> Double
+sampleCorrelation xs ys =
+      let avgX   = avg xs
+          avgY   = avg ys
+          nxs    = map (subtract avgX) xs
+          nys    = map (subtract avgY) ys
+          upper  = sum $ zipWith (*) nxs nys
+          lowerX = sum $ map (**2) nxs
+          lowerY = sum $ map (**2) nys
+          lower  = sqrt $ lowerX * lowerY
+      in upper / lower
+
+-- |Calculate root mean square error from given list of
+-- truths and predictions.
+rmse :: [Double] -> [Double] -> Double
+rmse truths preds =
     let errors = sum . map (**2) $ zipWith (-) truths preds
         n      = fromIntegral . length $ truths
     in sqrt $ errors / n
