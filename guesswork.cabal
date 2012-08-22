@@ -33,6 +33,7 @@ Library
                    , Guesswork.Transform.Scale
                    , Guesswork.Estimate
                    , Guesswork.Estimate.KNN
+                   , Guesswork.Estimate.SVR
                    , Guesswork.Estimate.Linear
                    , Guesswork.Import.CSVUtils
                    , Guesswork.Export.Print

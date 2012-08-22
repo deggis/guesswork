@@ -20,3 +20,7 @@ takeBut xs index = if index < length xs
                         then (xs !! index, take index xs ++ drop (index+1) xs)
                         else error "takeBut: index too big."
 
+fitnessAvg :: [Double] -> [Double] -> Double
+fitnessAvg truths estimates = avg $ zipWith (\a b -> abs (a-b)) truths estimates
+
+calcFitness = fitnessAvg

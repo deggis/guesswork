@@ -86,7 +86,4 @@ kNNEstimate others k features =
 
 flip' (a,b) = (b,a)
 
-fitnessAvg :: [Double] -> [Double] -> Double
-fitnessAvg truths estimates = avg $ zipWith (\a b -> abs (a-b)) truths estimates
 
-calcFitness = fitnessAvg

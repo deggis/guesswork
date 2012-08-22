@@ -47,6 +47,10 @@ module Guesswork
     , trainKNN'
     , linear
     , trainLinear
+    , svr 
+    , defaultSVR
+    , SVRConfig(..)
+    , Estimated(..)
 
       -- ** Result analyzing
     , analyze
@@ -58,6 +62,7 @@ import Guesswork.IO
 import Guesswork.Estimate
 import Guesswork.Estimate.KNN
 import Guesswork.Estimate.Linear
+import Guesswork.Estimate.SVR
 import Guesswork.Arrange
 import Guesswork.Transform
 import Guesswork.Analyze
