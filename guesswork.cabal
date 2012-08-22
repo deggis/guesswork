@@ -23,6 +23,7 @@ Library
                  , text
                  , attoparsec
                  , mtl
+                 , random
                  , kmeans-vector >= 0.2
                  , hmatrix
                  , svm-simple
@@ -30,6 +31,7 @@ Library
     Exposed-modules: Guesswork.Transform
                    , Guesswork.Math.Statistics
                    , Guesswork.Arrange
+                   , Guesswork.Arrange.RandomShuffle
                    , Guesswork.Analyze
                    , Guesswork.Transform.Scale
                    , Guesswork.Estimate
