@@ -3,8 +3,11 @@ module Guesswork.Arrange where
 
 import Guesswork.Types
 import Control.Monad
+import Control.Arrow
 import Control.Exception
 import qualified Data.Vector.Unboxed as V
+import Math.KMeans
+import Guesswork.Transform.Scale
 
 data Arranged = Separated { train :: [Sample]
                           , test :: [Sample]
@@ -44,3 +47,24 @@ onlyTrain :: [Sample] -> Guesswork Arranged
 onlyTrain samples = do
     let trace = "A=onlytrain"
     return $ OnlyTrain samples trace
+
+-- | Separates samples with kmeans.
+-- For k-means, the features are used as scaled [0,1].
+-- Returned sample sets are still in their original state.
+-- Using fixed ratio of 2:1 for train:test.
+-- FIXME: enable splitting with different ratios
+separateDataKMeans :: Int -> [Sample] -> Guesswork Arranged
+separateDataKMeans nClusters samples = do
+    let
+        ranges      = calcRanges . map snd $ samples
+        scaledPairs = map (\s -> (scaleUsingRanges (0,1) ranges . snd $ s, s)) samples 
+        -- Create clusters
+        clusters    = kmeans nClusters scaledPairs
+        -- Flatten clusters and pick data using 1:2.
+        ordered     = zip (cycle [1..3]) . map snd . concat $ clusters
+        picker p    = map snd . filter (\(i,_) -> p i) $ ordered
+        train       = picker (<3)
+        test        = picker (==3)
+        trace       = "A=kmeans"
+    return Separated{..}
+

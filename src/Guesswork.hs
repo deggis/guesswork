@@ -29,6 +29,7 @@ module Guesswork
     , leaveOneOut
     , alreadySeparated
     , onlyTrain
+    , separateDataKMeans
 
       -- ** Transform data
     , scale

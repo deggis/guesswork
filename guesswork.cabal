@@ -23,6 +23,7 @@ Library
                  , text
                  , attoparsec
                  , mtl
+                 , kmeans-vector >= 0.2
                  , hmatrix
                  , svm-simple
 
