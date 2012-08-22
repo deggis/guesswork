@@ -27,38 +27,40 @@ data Operation = ScaleOp { config :: ScaleConfig
                | PassOp
     deriving (Show)
 
-data Transformed = Separated { train :: [Sample]
-                 , test :: [Sample]
-                 , trace :: Trace }
-                 | LeaveOneOut [Sample] Trace
-                 | OnlyTrain [Sample] Operation Trace
+data (Sample a) => Transformed a =
+      Separated { train :: [a]
+                , test  :: [a]
+                , trace :: Trace
+                }
+    | LeaveOneOut [a] Trace
+    | OnlyTrain [a] Operation Trace
     deriving(Show)
 
 defaultScaleConfig = ScaleConfig (0,1)
 
 -- |Scaling transformation: scales data values between [0,1]
 -- based on feature ranges of train data points.
-scale :: ARRANGE.Arranged -> Guesswork Transformed
+scale :: (Sample a) => ARRANGE.Arranged a -> Guesswork (Transformed a)
 scale = scale' defaultScaleConfig
 
 -- |Scaling transformation: scales data values between given
 -- range based on feature ranges of train data points.
-scale' :: ScaleConfig -> ARRANGE.Arranged -> Guesswork Transformed
+scale' :: (Sample a) => ScaleConfig -> ARRANGE.Arranged a -> Guesswork (Transformed a)
 scale' config (ARRANGE.Separated train test trace) = do
-    let op     = getTransform (Scale config) . map snd $ train
-        train' = applyToFs op train
-        test'  = applyToFs op test
+    let op     = getTransform (Scale config) . map features $ train
+        train' = modify op train
+        test'  = modify op test
     return $ Separated train' test' (trace ++ ",D=scaling")
 scale' config (ARRANGE.LeaveOneOut samples trace) = do
-    let op     = getTransform (Scale config) . map snd $ samples
-    return $ LeaveOneOut (applyToFs op samples) (trace ++ ",D=scaling")
+    let op     = getTransform (Scale config) . map features $ samples
+    return $ LeaveOneOut (modify op samples) (trace ++ ",D=scaling")
 scale' config (ARRANGE.OnlyTrain train trace) = do
-    let op     = getTransform (Scale config) . map snd $ train
-        train' = applyToFs op train
+    let op     = getTransform (Scale config) . map features $ train
+        train' = modify op train
     return $ OnlyTrain train' op (trace ++ ",D=scaling")
 
 -- |No-op, just pass the data without doing any transformations.
-pass :: ARRANGE.Arranged -> Guesswork Transformed
+pass :: (Sample a) => ARRANGE.Arranged a -> Guesswork (Transformed a)
 pass (ARRANGE.Separated train test trace) = do
     let trace' = trace ++ ",D=pass"
     return $ Separated train test trace
@@ -68,13 +70,13 @@ pass (ARRANGE.LeaveOneOut samples trace) = do
 pass (ARRANGE.OnlyTrain train trace) = do
     return $ OnlyTrain train PassOp (trace ++ ",D=pass")
 
-applyToFs f = map (second (apply f))
+modify op = map (transform (apply op))
 
 --pcaSet :: TSeparated -> TProcessed
 --pcaSet TSeparated{..} =
 --    let op = getTransform (PCA 0.1) $ map snd trainFat
---        trainFat' = applyToFs op trainFat
---        testFat'  = applyToFs op testFat
+--        trainFat' = modify op trainFat
+--        testFat'  = modify op testFat
 --        processBranch = separationBranch ++ ",D=PCA"
 --    in TProcessed{..}
 

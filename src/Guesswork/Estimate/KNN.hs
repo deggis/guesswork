@@ -1,5 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
 module Guesswork.Estimate.KNN where
 
 import Data.List
@@ -13,48 +15,52 @@ import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
 import qualified Debug.Trace as T
 
-data KNN = KNN [Sample] Int TRANSFORM.Operation Trace
+data (Sample a) => KNN a =
+    KNN [a] Int TRANSFORM.Operation Trace
 
-instance GuessworkEstimator KNN where
+instance (Sample a) => GuessworkEstimator (KNN a) where
     guessWith (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
 
-type KNNFitness = [Sample] -> Int -> Double
+type KNNFitness = (Sample a) => [a] -> Int -> Double
 
 data KNNConfig = KNNConfig { ks :: [Int]
-                           , fitness :: KNNFitness }
+                           , fitness :: KNNFitness
+                           }
 
 -- | Default KNN configuration: test k values between 1 and 20.
 defaultKNN = KNNConfig [1..20] splitFitness
 
 -- | Perform KNN with defaultKNN configuration.
-kNN :: TRANSFORM.Transformed -> Guesswork Estimated
+kNN :: (Sample a) => TRANSFORM.Transformed a -> Guesswork (Estimated a)
 kNN t@TRANSFORM.Separated{..}   = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
 kNN t@TRANSFORM.LeaveOneOut{..} = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
 
 -- | Assumes scaled & prepared data.
-kNN' :: KNNConfig -> TRANSFORM.Transformed -> Guesswork Estimated
+kNN' :: (Sample a) => KNNConfig -> TRANSFORM.Transformed a -> Guesswork (Estimated a)
 kNN' conf (TRANSFORM.Separated train test trace) = do
-    let bestK     = findBestK conf train
-        estimates = map (kNNEstimate train bestK . snd) test
-        truths    = map fst test
-    return $ Estimated truths estimates (trace ++ ",R=kNN("++show bestK++")")
+    let
+        bestK     = findBestK conf train
+        estimates = map (kNNEstimate train bestK . features) test
+        truths    = map target test
+    return $ Estimated truths estimates test (trace ++ ",R=kNN("++show bestK++")")
 kNN' conf (TRANSFORM.LeaveOneOut samples trace) = do
-    let bestK     = findBestK conf samples
+    let
+        bestK     = findBestK conf samples
         indices   = [0..(length samples - 1)]
         pairs     = map (takeBut samples) indices
-        estimates = map (\(x,xs) -> kNNEstimate xs bestK (snd x)) pairs
-        truths    = map fst samples
-    return $ Estimated truths estimates (trace ++ ",R=kNN("++show bestK++")")
+        estimates = map (\(x,xs) -> kNNEstimate xs bestK (features x)) pairs
+        truths    = map target samples
+    return $ Estimated truths estimates samples (trace ++ ",R=kNN("++show bestK++")")
 
 trainKNN = trainKNN' defaultKNN
 
-trainKNN':: KNNConfig -> TRANSFORM.Transformed -> Guesswork KNN
+trainKNN':: (Sample a) => KNNConfig -> TRANSFORM.Transformed a -> Guesswork (KNN a)
 trainKNN' conf (TRANSFORM.OnlyTrain samples op trace) = do
     let bestK  = findBestK conf samples
     return $ KNN samples bestK op (trace ++ ",R=kNN")
 trainKNN' _ _ = error "Unsupported knn operation."
 
-findBestK :: KNNConfig -> [Sample] -> Int
+findBestK :: (Sample a) => KNNConfig -> [a] -> Int
 findBestK KNNConfig{..} samples =
     let paired = map (\k->(k, fitness samples k)) ks
         bestK = fst . head . sortBy (comparing snd) $ paired
@@ -64,8 +70,8 @@ findBestK KNNConfig{..} samples =
 splitFitness :: KNNFitness
 splitFitness samples k =
     let (train,test) = splitAt (length samples `div` 2) samples
-        estimates = map (kNNEstimate train k . snd) test
-        truths    = map fst test
+        estimates = map (kNNEstimate train k . features) test
+        truths    = map target test
     in calcFitness truths estimates
 
 -- FIXME: generalize
@@ -73,15 +79,15 @@ leaveOneOutFitness :: KNNFitness
 leaveOneOutFitness samples k = 
     let indices   = [0..(length samples - 1)]
         pairs     = map (takeBut samples) indices
-        estimates = map (\(x,xs) -> kNNEstimate xs k (snd x)) pairs
-        truths    = map fst samples
+        estimates = map (\(x,xs) -> kNNEstimate xs k (features x)) pairs
+        truths    = map target samples
     in calcFitness truths estimates
 
-kNNEstimate :: [Sample] -> Int -> FeatureVector -> Double
-kNNEstimate others k features =
-    let f           = second (euclidianNorm features)
+kNNEstimate :: (Sample a) => [a] -> Int -> FeatureVector -> Double
+kNNEstimate others k vec =
+    let f x         = (x, euclidianNorm vec (features x))
         byDistances = sortBy (comparing snd) . map f $ others
-        kNearest    = take k . map fst $ byDistances
+        kNearest    = map target . take k . map fst $ byDistances
     in avg kNearest
 
 flip' (a,b) = (b,a)

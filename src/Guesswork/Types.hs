@@ -20,7 +20,28 @@ type FeatureVector = V.Vector Double
 
 type Trace = String
 
-type Sample = (Double,FeatureVector)
+class Transformable a where
+    transform :: (FeatureVector -> FeatureVector) -> a -> a
+
+class (Show a, Eq a, Transformable a) => Sample a where
+    target   :: a -> Double
+    features :: a -> FeatureVector
+
+newtype SamplePair = SP (Double,FeatureVector)
+    deriving (Show)
+
+toPair :: (Sample a) => a -> (Double,FeatureVector)
+toPair x = (target x, features x)
+
+instance Sample SamplePair where
+    target   (SP (x,_)) = x
+    features (SP (_,f)) = f
+
+instance Transformable SamplePair where
+    transform f (SP (x,v)) = SP (x, f v)
+
+instance Eq SamplePair where
+    (SP (a,_)) == (SP (b,_)) = a == b
 
 data GuessworkException = ArrangeException String
                         | ParserException String

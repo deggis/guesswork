@@ -24,39 +24,43 @@ type Solution = PM.Matrix Double
 instance GuessworkEstimator Linear where
     guessWith (Linear solution op _) = apply solution . TRANSFORM.apply op
 
-linear :: TRANSFORM.Transformed -> Guesswork Estimated
+linear :: (Sample a) => TRANSFORM.Transformed a -> Guesswork (Estimated a)
 linear (TRANSFORM.Separated train test trace) = do
-    let trainFeatures = featureMatrix train
-        trainTruth    = PV.fromList . map fst $ train
+    let
+        trainFeatures = featureMatrix train
+        trainTruth    = PV.fromList . map target $ train
         solution      = solve trainFeatures trainTruth 
-        estimates     = map (apply solution . snd) test
-        truths        = map fst test
-    return $ Estimated truths estimates (trace ++ ",R=linear")
+        estimates     = map (apply solution . features) test
+        truths        = map target test
+        samples       = test
+    return $ Estimated truths estimates samples (trace ++ ",R=linear")
   where
 linear (TRANSFORM.LeaveOneOut samples trace) = do
-    let indices    = [0..(length samples - 1)]
+    let
+        indices    = [0..(length samples - 1)]
         groups     = map (takeBut samples) indices
         solutions  = map (second trainLinear') groups
-        truths     = map fst samples
-        estimates  = map (uncurry apply . second snd . flip') solutions
-    return $ Estimated truths estimates (trace ++ ",R=linear")
+        truths     = map target samples
+        estimates  = map (uncurry apply . second features . flip') solutions
+    return $ Estimated truths estimates samples (trace ++ ",R=linear")
   where
     flip' (a,b) = (b,a)
 
-trainLinear :: TRANSFORM.Transformed -> Guesswork Linear
+trainLinear :: (Sample a) => TRANSFORM.Transformed a -> Guesswork Linear
 trainLinear (TRANSFORM.OnlyTrain train op trace) = do
     let solution = trainLinear' train
     return $ Linear solution op (trace ++ ",R=linear")
 
-trainLinear' :: [Sample] -> Solution
+trainLinear' :: (Sample a) => [a] -> Solution
 trainLinear' train =
     let trainFeatures = featureMatrix train
-        trainTruth    = PV.fromList . map fst $ train
+        trainTruth    = PV.fromList . map target $ train
     in solve trainFeatures trainTruth
 
 solve trainFeatures trainTruth = Algo.linearSolveSVD trainFeatures $ PM.fromColumns [trainTruth]
 
-featureMatrix = PM.fromRows . map (packVector . snd)
+featureMatrix :: (Sample a) => [a] -> PM.Matrix Double
+featureMatrix = PM.fromRows . map (packVector . features)
 
 apply :: Solution -> V.Vector Double -> Double
 apply solution features =

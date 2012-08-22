@@ -9,17 +9,19 @@ import qualified Data.Vector.Unboxed as V
 import Math.KMeans
 import Guesswork.Transform.Scale
 
-data Arranged = Separated { train :: [Sample]
-                          , test :: [Sample]
-                          , trace :: Trace }
-              | LeaveOneOut [Sample] Trace
-              | OnlyTrain [Sample] Trace
+data (Sample a) => Arranged a =
+    Separated { train :: [a]
+              , test :: [a]
+              , trace :: Trace
+              }
+    | LeaveOneOut [a] Trace
+    | OnlyTrain [a] Trace
     deriving(Show)
 
 -- |Splits data to training and testing using given ratio
 -- 'trainAmount' that is used for training, 0.5 as 50 %.
 -- First samples are used for training.
-splitWithRatio :: Double -> [Sample] -> Guesswork Arranged
+splitWithRatio :: (Sample a) => Double -> [a] -> Guesswork (Arranged a)
 splitWithRatio trainAmount samples = do
     let n          = length samples
         toTraining = floor $ fromIntegral n * trainAmount
@@ -31,19 +33,19 @@ splitWithRatio trainAmount samples = do
     return Separated{..}
 
 -- |Use data as leave-one-out
-leaveOneOut :: [Sample] -> Guesswork Arranged
+leaveOneOut :: (Sample a) => [a] -> Guesswork (Arranged a)
 leaveOneOut samples = do
     when (samples == []) . throw $ ArrangeException "Empty sample set!"
     let trace = "A=leaveoneout"
     return $ LeaveOneOut samples trace
 
 -- |Use beforehand separated train & test data.
-alreadySeparated :: [Sample] -> [Sample] -> Guesswork Arranged
+alreadySeparated :: (Sample a) => [a] -> [a] -> Guesswork (Arranged a)
 alreadySeparated train test = do
     let trace = "A=preseparated"
     return Separated{..}
 
-onlyTrain :: [Sample] -> Guesswork Arranged
+onlyTrain :: (Sample a) => [a] -> Guesswork (Arranged a)
 onlyTrain samples = do
     let trace = "A=onlytrain"
     return $ OnlyTrain samples trace
@@ -53,11 +55,11 @@ onlyTrain samples = do
 -- Returned sample sets are still in their original state.
 -- Using fixed ratio of 2:1 for train:test.
 -- FIXME: enable splitting with different ratios
-separateDataKMeans :: Int -> [Sample] -> Guesswork Arranged
+separateDataKMeans :: (Sample a) => Int -> [a] -> Guesswork (Arranged a)
 separateDataKMeans nClusters samples = do
     let
-        ranges      = calcRanges . map snd $ samples
-        scaledPairs = map (\s -> (scaleUsingRanges (0,1) ranges . snd $ s, s)) samples 
+        ranges      = calcRanges . map features $ samples
+        scaledPairs = map (\s -> (scaleUsingRanges (0,1) ranges . features $ s, s)) samples 
         -- Create clusters
         clusters    = kmeans nClusters scaledPairs
         -- Flatten clusters and pick data using 1:2.

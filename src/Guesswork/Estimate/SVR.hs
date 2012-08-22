@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 module Guesswork.Estimate.SVR
     (
       SVR
@@ -37,20 +38,21 @@ data SVRConfig = SVRConfig { epsilon :: Double
 
 defaultSVR = SVRConfig 0.1 Linear
 
-svr :: SVRConfig -> TRANSFORM.Transformed -> Guesswork Estimated
+svr :: (Sample a) => SVRConfig -> TRANSFORM.Transformed a -> Guesswork (Estimated a)
 svr conf (TRANSFORM.Separated train test trace') = do
     let
         (trainSet,fitnessSet)  = splitAt (length train `div` 2) train
         (_, regressor, setups) = optimizeSVR trainSet fitnessSet conf
-        testFeatures           = map snd test
+        testFeatures           = map features test
         estimates              = map (SVM.predictRegression regressor) testFeatures
-        truths                 = map fst test
+        truths                 = map target test
         ((e,c,k),_)            = head setups
         trace                  = trace' ++ ",R=SVRRBF{ε=" ++ show e ++ ",C=" ++ show c ++ ",g=" ++ show k
+        samples                = test
     return Estimated{..}
 
 optimizeSVR _      _        SVRConfig{..} = error "Not supported"
-optimizeSVR trainD fitnessD GridSearch{..} =
+optimizeSVR (map toPair->trainD) (map toPair->fitnessD) GridSearch{..} =
     let
         svrSetups       = [ (e,c,k) | e<-epsilon_candidates
                                     , c<-cost_candidates

@@ -9,10 +9,13 @@ import Guesswork.Types
 import Guesswork.Math.Statistics
 import qualified Guesswork.Transform as TRANSFORM
 
-data Estimated = Estimated { truths    :: [Double]
-                           , estimates :: [Double]
-                           , trace :: Trace
-                           }
+data (Sample a) => Estimated a =
+    Estimated { truths    :: [Double]
+              , estimates :: [Double]
+              , samples   :: [a]
+              , trace :: Trace
+              }
+    deriving (Show)
 
 -- | Returns (element from given index, rest).
 takeBut :: [a] -> Int -> (a,[a])
