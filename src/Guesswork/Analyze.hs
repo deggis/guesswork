@@ -4,6 +4,7 @@ module Guesswork.Analyze where
 import Guesswork.Types
 import Guesswork.Math.Statistics as S
 import qualified Guesswork.Estimate as ESTIMATE
+import Text.Printf
 
 data (Sample a) => Analyzed a =
     Analyzed { trace :: Trace
@@ -13,7 +14,9 @@ data (Sample a) => Analyzed a =
              , rmse :: Double
              , estimations :: ESTIMATE.Estimated a
              }
-    deriving Show
+
+instance (Sample a) => Show (Analyzed a) where
+    show Analyzed{..} = printf "Set: %s: min/max/avg errors: %4.3f %4.3f %4.3f, rmse: %4.3f" trace minError avgError maxError rmse
 
 analyze :: (Sample a) => ESTIMATE.Estimated a -> Guesswork (Analyzed a)
 analyze e@ESTIMATE.Estimated{..} =

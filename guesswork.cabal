@@ -10,7 +10,7 @@ Category:      Math
 Build-type:    Simple
 
 -- Constraint on the version of Cabal needed to build this package.
-Cabal-version:       >=1.2
+Cabal-version:       >=1.8
 
 Library
     hs-source-dirs: src
@@ -44,3 +44,11 @@ Library
                    , Guesswork.Types
                    , Guesswork.Flow
                    , Guesswork
+
+Test-Suite all-tests 
+    hs-source-dirs: tests
+    type:           exitcode-stdio-1.0
+    main-is:        all-tests.hs
+
+    build-depends: base
+                 , guesswork
