@@ -32,8 +32,8 @@ defaultKNN = KNNConfig [1..20] splitFitness
 
 -- | Perform KNN with defaultKNN configuration.
 kNN :: (Sample a) => TRANSFORM.Transformed a -> Guesswork (Estimated a)
-kNN t@TRANSFORM.Separated{..}   = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
-kNN t@TRANSFORM.LeaveOneOut{..} = kNN' (defaultKNN { fitness = leaveOneOutFitness }) t
+kNN t@TRANSFORM.Separated{..}   = kNN' defaultKNN t
+kNN t@TRANSFORM.LeaveOneOut{..} = kNN' defaultKNN t
 
 -- | Assumes scaled & prepared data.
 kNN' :: (Sample a) => KNNConfig -> TRANSFORM.Transformed a -> Guesswork (Estimated a)

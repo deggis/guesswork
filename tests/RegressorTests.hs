@@ -1,41 +1,57 @@
 module RegressorTests where
 
+import Control.Monad
 import Guesswork
 import Guesswork.Math.Statistics
+import System.Exit (exitFailure)
 
 import TestSetup
+import Text.Printf
 
-testKNN = do
+
+assertLists xs ys =
+    if xs == ys
+        then return ()
+        else do
+            putStrLn "Lists not same!"
+            let f = mapM_ (putStr . printf "%4.3f ") 
+            f xs
+            putStrLn "!="
+            f ys
+            exitFailure
+
+-- | This test tests a property that states:
+-- train only + estimate manually == train & test automatically
+-- Note that to pass this test the same scaling transform must
+-- also be done in both cases.
+knnManualEstimationWithScalingEqualsAutomatic = do
     train <- readFeatureFile trainFile
     test  <- readFeatureFile testFile
     let arr  = alreadySeparated train test
-    a <- runGuesswork $ arr >>= scale >>= kNN >>= analyze
-    print a
+    set1 <- fmap estimates . runGuesswork $ arr >>= scale >>= kNN
+    t <- runGuesswork $ onlyTrain train >>= scale >>= trainKNN
+    let set2 = map (guessWith t . features) test
+    assertLists set1 set2
 
-testKNNTrain = do
+-- | This test tests a property that states:
+-- train only + estimate manually == train & test automatically
+-- Note that to pass this test the same scaling transform must
+-- also be done in both cases.
+linearManualEstimationWithScalingEqualsAutomatic = do
     train <- readFeatureFile trainFile
     test  <- readFeatureFile testFile
-    t <- runGuesswork $ onlyTrain train >>= scale >>= trainKNN
-    print $ map (guessWith t . features) test
+    let arr  = alreadySeparated train test
+    set1 <- fmap estimates . runGuesswork $ arr >>= scale >>= linear
+    t <- runGuesswork $ onlyTrain train >>= scale >>= trainLinear
+    let set2 = map (guessWith t . features) test
+    assertLists set1 set2
+
+-- No DRY, very wet
 
 testKNNLeaveOneOut = do
     train <- readFeatureFile trainFile
     a <- runGuesswork $ leaveOneOut train >>= pass >>= kNN >>= analyze
     print a
-
-testLinear = do
-    train <- readFeatureFile trainFile
-    test  <- readFeatureFile testFile
-    let arr  = alreadySeparated train test
-    a <- runGuesswork $ arr >>= pass >>= linear >>= analyze
-    print a
-
-testLinearTrain = do
-    train <- readFeatureFile trainFile
-    test  <- readFeatureFile testFile
-    t <- runGuesswork $ onlyTrain train >>= pass >>= trainLinear
-    let estimates = map (guessWith t . features) test
-    spit test estimates
 
 testLinearLeaveOneOut = do
     train <- readFeatureFile trainFile
@@ -47,10 +63,8 @@ spit set estimates = do
     print $ sampleCorrelation (map target set) estimates
 
 allRegressorTests = ([
-     ( testKNN, "knn" )
-    ,( testKNNTrain, "knn only train" )
+     ( knnManualEstimationWithScalingEqualsAutomatic, "knnManualEstimationWithScalingEqualsAutomatic" )
+    ,( linearManualEstimationWithScalingEqualsAutomatic, "linearManualEstimationWithScalingEqualsAutomatic" )
     ,( testKNNLeaveOneOut, "knn leave-one-out" )
-    ,( testLinear, "linearsvd" )
-    ,( testLinearTrain, "linear only train" )
     ,( testLinearLeaveOneOut, "linear leave-one-out" )
    ],"Regressor tests")
