@@ -2,7 +2,7 @@
 
 {-|
 
-This module contains basic Guesswork definitions for reading/writing
+This module exports basic Guesswork definitions for reading/writing
 files and basic tools to get started quickly.
 
 -}
@@ -17,8 +17,9 @@ module Guesswork
     , runGuesswork
 
       -- ** Essential types
-    , Sample
+    , Sample(..)
     , FeatureVector
+    , Transformable(..)
 
       -- ** IO: Reading/writing files
     , readFeatureFile

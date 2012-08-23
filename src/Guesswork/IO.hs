@@ -47,3 +47,8 @@ readFeatureFile fn = do
 -- |Writes samples to given filepath. See sample for format.
 writeFeatureFile :: (Sample a) => FilePath -> [a] -> IO ()
 writeFeatureFile path = T.writeFile path . T.unlines . map sampleToText
+
+
+
+
+

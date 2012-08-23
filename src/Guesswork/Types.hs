@@ -27,11 +27,11 @@ class (Show a, Eq a, Transformable a) => Sample a where
     target   :: a -> Double
     features :: a -> FeatureVector
 
-newtype SamplePair = SP (Double,FeatureVector)
-    deriving (Show)
-
 toPair :: (Sample a) => a -> (Double,FeatureVector)
 toPair x = (target x, features x)
+
+newtype SamplePair = SP (Double,FeatureVector)
+    deriving (Show)
 
 instance Sample SamplePair where
     target   (SP (x,_)) = x
@@ -42,6 +42,8 @@ instance Transformable SamplePair where
 
 instance Eq SamplePair where
     (SP (a,_)) == (SP (b,_)) = a == b
+
+
 
 data GuessworkException = ArrangeException String
                         | ParserException String
