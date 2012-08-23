@@ -5,12 +5,12 @@ import System.Exit (exitFailure,exitSuccess)
 import Guesswork
 import Text.Printf
 
-import RegressionTests
+import RegressorTests
 import IOTests
 
 testSets = [
     ioTests
-   ,allRegressionTests
+   ,allRegressorTests
    ]
 
 type Test = (IO (), String)

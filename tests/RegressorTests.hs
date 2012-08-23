@@ -1,4 +1,4 @@
-module RegressionTests where
+module RegressorTests where
 
 import Guesswork
 import Guesswork.Math.Statistics
@@ -46,11 +46,11 @@ spit :: (Sample a) => [a] -> [Double] -> IO ()
 spit set estimates = do 
     print $ sampleCorrelation (map target set) estimates
 
-allRegressionTests = ([
+allRegressorTests = ([
      ( testKNN, "knn" )
     ,( testKNNTrain, "knn only train" )
     ,( testKNNLeaveOneOut, "knn leave-one-out" )
     ,( testLinear, "linearsvd" )
     ,( testLinearTrain, "linear only train" )
     ,( testLinearLeaveOneOut, "linear leave-one-out" )
-   ],"Regression tests")
+   ],"Regressor tests")
