@@ -2,3 +2,4 @@ cabal-dev
 dist
 *.swp
 _temp
+*.swo
