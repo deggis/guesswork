@@ -1,11 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Guesswork.Estimate.Linear where
 
 import Data.List
 import Data.Ord
+import Data.Serialize
+import GHC.Generics
 import Control.Arrow
+import Control.Applicative
 import qualified Data.Vector.Unboxed as V
 import qualified Data.Packed.Matrix as PM
 import qualified Data.Packed.Vector as PV
@@ -18,11 +23,25 @@ import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
 
 data Linear = Linear Solution TRANSFORM.Operation Trace
+    deriving (Generic,Eq)
+
+instance Serialize Linear
 
 type Solution = PM.Matrix Double
 
+-- FIXME: a quicker way?
+instance Eq (PM.Matrix Double) where
+    a == b = open a == open b
+        where
+            open = map PV.toList . PM.toRows
+
+
 instance GuessworkEstimator Linear where
     guessWith (Linear solution op _) = apply solution . TRANSFORM.apply op
+
+instance Serialize (PM.Matrix Double) where
+    get = PM.fromRows . map PV.fromList <$> get
+    put = put . map PV.toList . PM.toRows
 
 linear :: (Sample a) => TRANSFORM.Transformed a -> Guesswork (Estimated a)
 linear (TRANSFORM.Separated train test trace) = do

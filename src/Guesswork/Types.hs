@@ -1,9 +1,14 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Guesswork.Types where
 
 import Control.Monad.RWS.Strict
 import Control.Exception
+import Control.Applicative
 import Data.Typeable
+import Data.Serialize as S
+import GHC.Generics
 import qualified Data.Vector.Unboxed as V
 
 type Guesswork a = RWST Conf Log () IO a
@@ -31,7 +36,9 @@ toPair :: (Sample a) => a -> (Double,FeatureVector)
 toPair x = (target x, features x)
 
 newtype SamplePair = SP (Double,FeatureVector)
-    deriving (Show)
+    deriving (Show,Generic,Eq)
+
+instance Serialize SamplePair
 
 instance Sample SamplePair where
     target   (SP (x,_)) = x
@@ -40,10 +47,9 @@ instance Sample SamplePair where
 instance Transformable SamplePair where
     transform f (SP (x,v)) = SP (x, f v)
 
-instance Eq SamplePair where
-    (SP (a,_)) == (SP (b,_)) = a == b
-
-
+instance Serialize (V.Vector Double) where
+    get = V.fromList <$> S.get
+    put = S.put . V.toList
 
 data GuessworkException = ArrangeException String
                         | ParserException String
@@ -51,5 +57,5 @@ data GuessworkException = ArrangeException String
 
 instance Exception GuessworkException
 
-class GuessworkEstimator a where
+class (Serialize a) => GuessworkEstimator a where
     guessWith :: a -> FeatureVector -> Double

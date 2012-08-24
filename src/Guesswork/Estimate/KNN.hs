@@ -6,8 +6,11 @@ module Guesswork.Estimate.KNN where
 
 import Data.List
 import Data.Ord
+import Data.Serialize
 import Control.Arrow
 import System.IO.Unsafe
+
+--import GHC.Generics
 
 import Guesswork.Types
 import Guesswork.Math.Statistics
@@ -15,11 +18,34 @@ import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
 import qualified Debug.Trace as T
 
-data (Sample a) => KNN a =
+-- | KNN data type represents KNN estimator for type Sample a.
+-- Serializing KNN requires also serializable Sample a type,
+-- since KNN is merely the samples and the transform operation.
+data (Sample a, Serialize a) => KNN a =
     KNN [a] Int TRANSFORM.Operation Trace
+    deriving (Eq)
 
-instance (Sample a) => GuessworkEstimator (KNN a) where
-    guessWith (KNN train k op _) = kNNEstimate train k . TRANSFORM.apply op
+
+instance (Serialize a, Sample a) => Serialize (KNN a) where
+    get = do
+        samples <- get
+        k <- get
+        op <- get
+        t <- get
+        return $ KNN samples k op t
+        
+    put (KNN samples k op t) = do
+        put samples
+        put k
+        put op
+        put t
+
+
+instance (Sample a, Serialize a) => GuessworkEstimator (KNN a) where
+    guessWith (KNN samples k op _) = kNNEstimate samples k . TRANSFORM.apply op
+
+    
+
 
 type KNNFitness = (Sample a) => [a] -> Int -> Double
 
@@ -54,7 +80,7 @@ kNN' conf (TRANSFORM.LeaveOneOut samples trace) = do
 
 trainKNN = trainKNN' defaultKNN
 
-trainKNN':: (Sample a) => KNNConfig -> TRANSFORM.Transformed a -> Guesswork (KNN a)
+trainKNN':: (Sample a, Serialize a) => KNNConfig -> TRANSFORM.Transformed a -> Guesswork (KNN a)
 trainKNN' conf (TRANSFORM.OnlyTrain samples op trace) = do
     let bestK  = findBestK conf samples
     return $ KNN samples bestK op (trace ++ ",R=kNN")

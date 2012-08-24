@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ViewPatterns #-}
 module Guesswork.Estimate.SVR
     (
@@ -18,23 +19,31 @@ import Guesswork.Math.Statistics
 import qualified Guesswork.Transform as TRANSFORM
 import Guesswork.Estimate
 import Data.List
+import GHC.Generics
 import Data.Ord
+import Data.Serialize
 import AI.SVM.Simple as SVM
 import AI.SVM.Base as SVM
 
 
 data SVR = SVR
+    deriving (Generic)
+
+instance Serialize SVR
 
 instance GuessworkEstimator SVR where
     guessWith SVR = error "Not implemented"
 
 -- | Using Epsilon SVR with given parameters
-data SVRConfig = SVRConfig { epsilon :: Double
-                           , kernel :: Kernel }
-               | GridSearch { epsilon_candidates :: [Double]
-                            , cost_candidates :: [Double]
-                            , kernel_candidates :: [Kernel] }
-    deriving (Show)
+data SVRConfig =
+     SVRConfig { epsilon :: Double                        
+               , kernel :: Kernel                         
+               }                                          
+   | GridSearch { epsilon_candidates :: [Double]          
+                , cost_candidates :: [Double]             
+                , kernel_candidates :: [Kernel]           
+                }
+  deriving (Show)
 
 defaultSVR = SVRConfig 0.1 Linear
 

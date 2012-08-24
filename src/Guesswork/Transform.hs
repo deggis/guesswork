@@ -1,8 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 module Guesswork.Transform where
 
 import Control.Arrow
 
+import Data.Serialize
+import GHC.Generics
 --import qualified Data.Array as A
 --import qualified Data.Packed.Vector as V
 --import qualified Data.Packed.Matrix as M
@@ -16,7 +19,9 @@ import Guesswork.Types
 import qualified Guesswork.Arrange as ARRANGE
 
 data ScaleConfig = ScaleConfig { toRange :: (Double,Double) }
-    deriving (Show,Eq)
+    deriving (Show,Eq,Generic)
+
+instance Serialize ScaleConfig
 
 data Method = Scale ScaleConfig
             | Pass
@@ -25,7 +30,10 @@ data Method = Scale ScaleConfig
 data Operation = ScaleOp { config :: ScaleConfig
                          , ranges :: [(Double,Double)] }
                | PassOp
-    deriving (Show)
+    deriving (Show,Generic,Eq)
+
+instance Serialize Operation
+
 
 data (Sample a) => Transformed a =
       Separated { train :: [a]
@@ -92,7 +100,7 @@ modify op = map (transform (apply op))
 apply :: Operation -> FeatureVector -> FeatureVector
 apply (ScaleOp ScaleConfig{..} ranges) vec = S.scaleUsingRanges toRange ranges vec
 apply PassOp                   vec = vec
---apply PCAOp{..} vec =
+--appl PCAOp{..} vec =
 --     let box a  = [a]
 --         pack   = pcaPackVecs . S.rotate2DArray . box
 --         unpack = head . pcaUnpackVecs

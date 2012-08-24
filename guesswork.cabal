@@ -27,6 +27,8 @@ Library
                  , kmeans-vector >= 0.2
                  , hmatrix
                  , svm-simple
+                 , cereal
+                 , ghc-prim
 
     Exposed-modules: Guesswork.Transform
                    , Guesswork.Math.Statistics
@@ -52,3 +54,4 @@ Test-Suite all-tests
 
     build-depends: base
                  , guesswork
+                 , cereal
