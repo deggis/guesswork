@@ -44,6 +44,11 @@ linearSerialization = do
     t <- runGuesswork $ onlyTrain train >>= scale >>= trainLinear
     assertSerialization t
 
+svrSerialization = do
+    train <- readFeatureFile trainFile
+    let conf = defaultSVR
+    t <- runGuesswork $ onlyTrain train >>= scale >>= trainSVR conf
+    assertSerialization t
 
 
 ioTests = ([

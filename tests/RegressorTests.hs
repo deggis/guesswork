@@ -20,6 +20,9 @@ assertLists xs ys =
             f ys
             exitFailure
 
+-- No DRY, very wet
+
+
 -- | This test tests a property that states:
 -- train only + estimate manually == train & test automatically
 -- Note that to pass this test the same scaling transform must
@@ -46,7 +49,20 @@ linearManualEstimationWithScalingEqualsAutomatic = do
     let set2 = map (guessWith t . features) test
     assertLists set1 set2
 
--- No DRY, very wet
+
+-- | This test tests a property that states:
+-- train only + estimate manually == train & test automatically
+-- Note that to pass this test the same scaling transform must
+-- also be done in both cases.
+svrManualEstimationWithScalingEqualsAutomatic = do
+    train <- readFeatureFile trainFile
+    test  <- readFeatureFile testFile
+    let arr  = alreadySeparated train test
+        conf = defaultSVR 
+    set1 <- fmap estimates . runGuesswork $ arr >>= scale >>= svr conf
+    t <- runGuesswork $ onlyTrain train >>= scale >>= trainSVR conf
+    let set2 = map (guessWith t . features) test
+    assertLists set1 set2
 
 testKNNLeaveOneOut = do
     train <- readFeatureFile trainFile
@@ -65,6 +81,7 @@ spit set estimates = do
 allRegressorTests = ([
      ( knnManualEstimationWithScalingEqualsAutomatic, "knnManualEstimationWithScalingEqualsAutomatic" )
     ,( linearManualEstimationWithScalingEqualsAutomatic, "linearManualEstimationWithScalingEqualsAutomatic" )
+    ,( svrManualEstimationWithScalingEqualsAutomatic, "svrManualEstimationWithScalingEqualsAutomatic" )
     ,( testKNNLeaveOneOut, "knn leave-one-out" )
     ,( testLinearLeaveOneOut, "linear leave-one-out" )
    ],"Regressor tests")

@@ -59,3 +59,6 @@ instance Exception GuessworkException
 
 class (Serialize a) => GuessworkEstimator a where
     guessWith :: a -> FeatureVector -> Double
+
+
+a +! b = a ++ show b

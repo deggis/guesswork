@@ -28,6 +28,7 @@ Library
                  , hmatrix
                  , svm-simple
                  , cereal
+                 , binary
                  , ghc-prim
 
     Exposed-modules: Guesswork.Transform

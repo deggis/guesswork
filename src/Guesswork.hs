@@ -51,6 +51,7 @@ module Guesswork
     , trainLinear
     , svr 
     , defaultSVR
+    , trainSVR
     , SVRConfig(..)
     , Estimated(..)
 
