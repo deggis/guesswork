@@ -27,7 +27,8 @@ import qualified Data.Binary as B
 import Data.Serialize
 import AI.SVM.Simple as SVM
 import AI.SVM.Base as SVM
-
+import Debug.Trace
+    
 
 data SVR = SVR SVMRegressor TRANSFORM.Operation Trace
     deriving (Generic,Eq)
@@ -46,7 +47,8 @@ instance GuessworkEstimator SVR where
 
 -- | Using Epsilon SVR with given parameters
 data SVRConfig =
-     SVRConfig { epsilon :: Double                        
+     SVRConfig { epsilon :: Double
+               , cost :: Double
                , kernel :: Kernel                         
                }                                          
    | GridSearch { epsilon_candidates :: [Double]          
@@ -55,19 +57,28 @@ data SVRConfig =
                 }
   deriving (Show)
 
-defaultSVR = SVRConfig 0.1 Linear
+defaultSVR = SVRConfig 0.1 1.0 Linear
 
 svr :: (Sample a) => SVRConfig -> TRANSFORM.Transformed a -> Guesswork (Estimated a)
 svr conf (TRANSFORM.Separated train test t) = do
     let
         testFeatures           = map features test
-        (trainSet,fitnessSet)  = splitAt (length train `div` 2) train
-        (_, regressor, setups) = optimizeSVR trainSet fitnessSet conf
+        (_, regressor, setups) = foo train conf
         estimates              = map (SVM.predictRegression regressor) testFeatures
         truths                 = map target test
-        trace                  = t ++ (showSVR . fst . head $ setups)
+        trace                  = t -- ++ (showSVR . fst . head $ setups)
         samples                = test
     return Estimated{..}
+
+foo train conf = 
+    case conf of
+        conf@GridSearch{..} ->
+            let 
+                (trainSet,fitnessSet)  = splitAt (length train `div` 2) train
+            in optimizeSVR trainSet fitnessSet conf
+        SVRConfig{..} ->
+            let (m,s) = SVM.trainRegressor (SVM.Epsilon cost epsilon) kernel $ map toPair train
+            in traceShow m $ (m, s, [])
 
 
 showSVR :: (Double,Double,Kernel) -> String
@@ -76,9 +87,8 @@ showSVR (e,c,k) = "EpsilonSVR{eps=" +! e ++ ",C=" +! c ++ ",kernel=" +! k
 trainSVR :: (Sample a) => SVRConfig -> TRANSFORM.Transformed a -> Guesswork SVR
 trainSVR conf (TRANSFORM.OnlyTrain samples op t) = do
     let
-        (trainSet,fitnessSet) = splitAt (length samples `div` 2) samples
-        (_, svr, setups)      = optimizeSVR trainSet fitnessSet conf
-        trace                 = t ++ (showSVR . fst . head $ setups)
+        (_, svr, setups)      = foo samples conf
+        trace                 = t -- ++ (showSVR . fst . head $ setups)
     return $ SVR svr op trace
 
 optimizeSVR _      _        SVRConfig{..} = error "Not supported"

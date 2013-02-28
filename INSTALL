@@ -1,5 +1,10 @@
 
 
+There's some system packages that are required to
+make dependecies install.
+
+libgsl-dev: GNU Scientific Library, hmatrix depends.
+
 
 
 

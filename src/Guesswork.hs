@@ -18,6 +18,7 @@ module Guesswork
 
       -- ** Essential types
     , Sample(..)
+    , SamplePair(..)
     , FeatureVector
     , Transformable(..)
 
@@ -53,6 +54,7 @@ module Guesswork
     , defaultSVR
     , trainSVR
     , SVRConfig(..)
+    , Kernel(..)
     , Estimated(..)
 
       -- ** Result analyzing
@@ -70,3 +72,4 @@ import Guesswork.Arrange
 import Guesswork.Transform
 import Guesswork.Analyze
 import Guesswork.Flow
+import AI.SVM.Base

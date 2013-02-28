@@ -27,9 +27,12 @@ Library
                  , kmeans-vector >= 0.2
                  , hmatrix
                  , svm-simple
+                 , deepseq
                  , cereal
                  , binary
                  , ghc-prim
+
+    extra-libraries: svm
 
     Exposed-modules: Guesswork.Transform
                    , Guesswork.Math.Statistics
